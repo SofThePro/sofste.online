@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Emoji encoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #EFEDF9;
+  --surface: #FFFFFF;
+  --ink: #1F1C4D;
+  --muted: #5E5A8A;
+  --line: #D9D5EE;
+  --indigo: #4B48C8;
+  --amber: #B97A00;
+  --sun: #FFC83D;
+  --sun-ink: #1F1C4D;
+  --display: "Fredoka", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16142E;
+    --surface: #221F44;
+    --ink: #EEECFF;
+    --muted: #ABA7D6;
+    --line: #3A3666;
+    --indigo: #A3A1FF;
+    --amber: #FFC83D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16142E;
+  --surface: #221F44;
+  --ink: #EEECFF;
+  --muted: #ABA7D6;
+  --line: #3A3666;
+  --indigo: #A3A1FF;
+  --amber: #FFC83D;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem) max(1.25rem, env(safe-area-inset-right, 0px)) 4rem max(1.25rem, env(safe-area-inset-left, 0px));
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.6rem;
+}
+.lede { margin: 0 0 1.75rem; color: var(--muted); max-width: 36rem; }
+
+/* Encode / Decode tabs */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+}
+.tabs button {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.5rem 1.35rem;
+  cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
+
+/* Method choice */
+.methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.method {
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+.method[aria-pressed="true"] {
+  border-color: var(--sun);
+  background: color-mix(in srgb, var(--sun) 20%, var(--surface));
+}
+.method-name { display: block; font-family: var(--display); font-weight: 500; font-size: 1.05rem; }
+.method-desc { display: block; color: var(--muted); font-size: 0.92rem; line-height: 1.45; margin-top: 0.2rem; }
+
+/* Fields */
+.field { margin-top: 1.5rem; }
+.field > label, .label {
+  display: block;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  margin-bottom: 0.45rem;
+}
+textarea, .custom {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+textarea { min-height: 6.5rem; resize: vertical; }
+textarea::placeholder, .custom::placeholder { color: var(--muted); opacity: 0.85; }
+textarea:focus, .custom:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--indigo) 25%, transparent);
+}
+:focus-visible { outline: 3px solid var(--indigo); outline-offset: 2px; }
+
+/* Carrier picker */
+.carriers { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.carrier {
+  width: 2.9rem;
+  height: 2.9rem;
+  font-family: var(--emoji);
+  font-size: 1.55rem;
+  line-height: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+.carrier:hover { border-color: var(--muted); }
+.carrier[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); }
+.custom { width: 7.5rem; height: 2.9rem; padding: 0 0.8rem; border-radius: 12px; }
+
+/* Result stage */
+.stage {
+  margin-top: 1.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 28px;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  text-align: center;
+}
+.big {
+  display: inline-block;
+  max-width: 100%;
+  font-family: var(--emoji);
+  font-size: clamp(5.5rem, 24vw, 9rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  -webkit-user-select: all;
+  user-select: all;
+}
+.big.pop { animation: pop 0.28s ease-out; }
+@keyframes pop {
+  0% { transform: scale(0.82); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.barcode {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px 2px;
+  min-height: 2rem;
+  max-width: 32rem;
+  margin: 0.75rem auto 0;
+}
+.bar { width: 4px; border-radius: 2px; background: var(--indigo); }
+.bar.multi { background: var(--amber); }
+.more { align-self: center; margin-left: 0.4rem; font-size: 0.85rem; color: var(--muted); }
+.spelled {
+  font-family: var(--emoji);
+  font-size: 1.7rem;
+  line-height: 1.55;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  max-height: 18rem;
+  overflow: auto;
+  -webkit-user-select: all;
+  user-select: all;
+}
+.spelled:empty::before {
+  content: attr(data-empty);
+  font-family: var(--body);
+  font-size: 1rem;
+  color: var(--muted);
+}
+.meta { margin: 0.9rem 0 0; color: var(--muted); font-size: 0.95rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.2rem; }
+.btn {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.65rem 1.35rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+  cursor: pointer;
+}
+.btn.quiet { background: transparent; color: var(--ink); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.notes p { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.95rem; }
+
+/* Decode result */
+.stage.result { text-align: left; }
+.status { margin: 0; color: var(--muted); }
+.decoded { margin-top: 0.85rem; }
+.decoded p {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.decoded p + p { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1.5px dashed var(--line); }
+.stage.result .actions { justify-content: flex-start; }
+
+/* How it works */
+.how { margin-top: 2.5rem; border-top: 1.5px solid var(--line); padding-top: 1rem; }
+.how summary { font-family: var(--display); font-weight: 500; font-size: 1.05rem; cursor: pointer; }
+.how p { color: var(--muted); margin: 0.75rem 0 0; }
+
+@media (max-width: 540px) {
+  .methods { grid-template-columns: 1fr; }
+  .tabs { display: flex; }
+  .tabs button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Emoji encoder</h1>
+    <p class="lede">Hide a message inside a single emoji, or spell it out in emoji. Everything runs in your browser and nothing is sent anywhere.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button type="button" role="tab" id="tab-encode" aria-controls="panel-encode" aria-selected="true" data-view="encode">Encode</button>
+    <button type="button" role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false" data-view="decode" tabindex="-1">Decode</button>
+  </div>
+
+  <section id="panel-encode" role="tabpanel" aria-labelledby="tab-encode">
+    <div class="methods" role="group" aria-label="Encoding method">
+      <button type="button" class="method" data-method="hide" aria-pressed="true">
+        <span class="method-name">Hide in one emoji</span>
+        <span class="method-desc">Looks like a single emoji. The message rides along as invisible characters.</span>
+      </button>
+      <button type="button" class="method" data-method="spell" aria-pressed="false">
+        <span class="method-name">Spell in emoji</span>
+        <span class="method-desc">Turns every byte into a visible emoji. Anyone with this page can read it back.</span>
+      </button>
+    </div>
+
+    <div class="field">
+      <label for="msg">Your message</label>
+      <textarea id="msg" rows="4" placeholder="Type something to encode" spellcheck="false">Meet me by the big oak at noon.</textarea>
+    </div>
+
+    <div class="field" id="carrier-field">
+      <span class="label" id="carrier-label">Carrier emoji</span>
+      <div class="carriers" id="carriers" role="group" aria-labelledby="carrier-label">
+        <input id="custom" class="custom" type="text" maxlength="16" placeholder="Your own" aria-label="Your own carrier emoji or text" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="stage">
+      <div id="hide-view">
+        <div class="big" id="big"></div>
+        <div class="barcode" id="barcode" aria-hidden="true"></div>
+      </div>
+      <div id="spell-view" hidden>
+        <div class="spelled" id="spelled" data-empty="Type a message to see it in emoji."></div>
+      </div>
+      <p class="meta" id="enc-meta" aria-live="polite"></p>
+      <div class="actions">
+        <button type="button" class="btn" id="copy-enc" data-label="Copy" disabled>Copy</button>
+        <button type="button" class="btn quiet" id="to-decoder" disabled>Test in decoder</button>
+      </div>
+    </div>
+
+    <div class="notes" id="hide-note">
+      <p>Each bar is one hidden byte, taller for higher values. Amber bars come from characters outside plain ASCII, like é or 🎉.</p>
+      <p>Some apps strip invisible characters when you paste, which erases the message. If the person you send it to sees only the emoji, try another app.</p>
+    </div>
+  </section>
+
+  <section id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
+    <div class="field">
+      <label for="dec-in">Paste encoded text</label>
+      <textarea id="dec-in" rows="4" placeholder="Paste an emoji with a hidden message, or a string of emoji" spellcheck="false"></textarea>
+    </div>
+    <div class="stage result">
+      <p class="status" id="dec-status" aria-live="polite"></p>
+      <div class="decoded" id="dec-out" hidden></div>
+      <div class="actions">
+        <button type="button" class="btn" id="copy-dec" data-label="Copy message" disabled>Copy message</button>
+        <button type="button" class="btn quiet" id="clear-dec" disabled>Clear</button>
+      </div>
+    </div>
+  </section>
+
+  <details class="how">
+    <summary>How it works</summary>
+    <p>Unicode has 256 variation selectors, invisible characters meant to pick between styles of the same symbol. Your message is turned into UTF-8 bytes, each byte becomes one of those selectors, and they’re attached right after the carrier emoji. Most apps show only the emoji but keep the hidden characters when you copy and paste.</p>
+    <p>Spelling mode uses a fixed alphabet of 256 emoji instead, one per byte, so the result is visible and anyone can decode it here. Neither method is encryption, so don’t use them for secrets that matter.</p>
+  </details>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var te = new TextEncoder();
+  var td = new TextDecoder();
+  var plural = function (n, one, many) { return n === 1 ? one : many; };
+
+  /* Hidden mode: one byte <-> one variation selector */
+  function byteToVS(b) {
+    return String.fromCodePoint(b < 16 ? 0xFE00 + b : 0xE0100 + b - 16);
+  }
+  function vsToByte(cp) {
+    if (cp >= 0xFE00 && cp <= 0xFE0F) return cp - 0xFE00;
+    if (cp >= 0xE0100 && cp <= 0xE01EF) return cp - 0xE0100 + 16;
+    return null;
+  }
+  function findHidden(text) {
+    var runs = [], cur = [];
+    for (var ch of text) {
+      var b = vsToByte(ch.codePointAt(0));
+      if (b === null) { if (cur.length) runs.push(cur); cur = []; }
+      else cur.push(b);
+    }
+    if (cur.length) runs.push(cur);
+    var out = [];
+    runs.forEach(function (run) {
+      var i = 0;
+      while (i < run.length && run[i] === 0x0F) i++; // a leading VS16 belongs to the emoji itself
+      if (i < run.length) out.push(td.decode(new Uint8Array(run.slice(i))));
+    });
+    return out;
+  }
+
+  /* Spelling mode: a fixed alphabet of 256 single-code-point emoji */
+  var RANGES = [[0x1F600, 0x1F64F], [0x1F400, 0x1F43E], [0x1F345, 0x1F37C], [0x1F680, 0x1F6C5]];
+  var ALPHA = [];
+  RANGES.forEach(function (r) {
+    for (var c = r[0]; c <= r[1] && ALPHA.length < 256; c++) ALPHA.push(String.fromCodePoint(c));
+  });
+  var REV = new Map(ALPHA.map(function (e, i) { return [e.codePointAt(0), i]; }));
+  function readSpelled(text) {
+    var bytes = [], skipped = 0;
+    for (var ch of text) {
+      var cp = ch.codePointAt(0);
+      if (REV.has(cp)) bytes.push(REV.get(cp));
+      else if (cp === 0xFE0F || cp === 0x200D || /\s/.test(ch)) continue;
+      else skipped++;
+    }
+    return { bytes: bytes, skipped: skipped };
+  }
+  function isReadable(s) {
+    return /[^\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/.test(s);
+  }
+
+  /* Encode view */
+  var CARRIERS = ["🤫", "😀", "😎", "🦊", "🐙", "🐸", "🍕", "🌵", "🚀", "🪐", "🎁", "💌", "👀", "🧠", "🔒", "🥚"];
+  var state = { method: "hide", chip: CARRIERS[0], carrier: CARRIERS[0], output: "" };
+  var msg = $("#msg"), big = $("#big"), barcode = $("#barcode"), meta = $("#enc-meta"),
+      spelled = $("#spelled"), copyEnc = $("#copy-enc"), toDec = $("#to-decoder"),
+      carriersEl = $("#carriers"), custom = $("#custom"), carrierField = $("#carrier-field"),
+      hideView = $("#hide-view"), spellView = $("#spell-view"), hideNote = $("#hide-note");
+
+  function cleanCarrier(s) {
+    return Array.from(s).filter(function (ch) {
+      var cp = ch.codePointAt(0);
+      return !((cp >= 0xFE00 && cp <= 0xFE0E) || (cp >= 0xE0100 && cp <= 0xE01EF));
+    }).join("").trim();
+  }
+
+  var chips = CARRIERS.map(function (e) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "carrier";
+    b.textContent = e;
+    b.setAttribute("aria-label", "Carrier " + e);
+    b.addEventListener("click", function () {
+      state.chip = e;
+      custom.value = "";
+      setCarrier(e, true);
+    });
+    carriersEl.insertBefore(b, custom);
+    return b;
+  });
+
+  function syncChips() {
+    var usingCustom = cleanCarrier(custom.value) !== "";
+    chips.forEach(function (b) {
+      b.setAttribute("aria-pressed", String(!usingCustom && b.textContent === state.chip));
+    });
+  }
+
+  function setCarrier(c, pop) {
+    state.carrier = c;
+    syncChips();
+    renderEncode();
+    if (pop) {
+      big.classList.remove("pop");
+      void big.offsetWidth;
+      big.classList.add("pop");
+    }
+  }
+
+  custom.addEventListener("input", function () {
+    setCarrier(cleanCarrier(custom.value) || state.chip, false);
+  });
+
+  var MAX_BARS = 240;
+  function drawBarcode(bytes) {
+    var frag = document.createDocumentFragment();
+    var shown = Math.min(bytes.length, MAX_BARS);
+    for (var i = 0; i < shown; i++) {
+      var b = bytes[i];
+      var s = document.createElement("span");
+      s.className = b >= 0x80 ? "bar multi" : "bar";
+      s.style.height = (5 + Math.round((b / 255) * 27)) + "px";
+      frag.appendChild(s);
+    }
+    if (bytes.length > MAX_BARS) {
+      var m = document.createElement("span");
+      m.className = "more";
+      m.textContent = "+" + (bytes.length - MAX_BARS);
+      frag.appendChild(m);
+    }
+    barcode.replaceChildren(frag);
+  }
+
+  function renderEncode() {
+    var bytes = te.encode(msg.value);
+    var n = bytes.length;
+    var hide = state.method === "hide";
+    hideView.hidden = !hide;
+    spellView.hidden = hide;
+    carrierField.hidden = !hide;
+    hideNote.hidden = !hide;
+
+    if (hide) {
+      var out = state.carrier;
+      for (var i = 0; i < n; i++) out += byteToVS(bytes[i]);
+      big.textContent = out;
+      state.output = n ? out : "";
+      drawBarcode(bytes);
+      meta.textContent = n
+        ? n + " hidden " + plural(n, "byte", "bytes") + ", stored as invisible characters after " + state.carrier + "."
+        : "Type a message to hide it in this emoji.";
+    } else {
+      var spelledOut = Array.from(bytes, function (b) { return ALPHA[b]; }).join("");
+      spelled.textContent = spelledOut;
+      state.output = spelledOut;
+      meta.textContent = n
+        ? n + " emoji, one for each byte of your message."
+        : "";
+    }
+    copyEnc.disabled = !state.output;
+    toDec.disabled = !state.output;
+  }
+
+  document.querySelectorAll(".method").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      state.method = btn.dataset.method;
+      document.querySelectorAll(".method").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      renderEncode();
+    });
+  });
+  msg.addEventListener("input", renderEncode);
+
+  /* Copy */
+  async function copyText(text, btn) {
+    var ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+    if (!ok) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+    }
+    btn.textContent = ok ? "Copied" : "Couldn’t copy";
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () { btn.textContent = btn.dataset.label; }, ok ? 1500 : 2500);
+  }
+  copyEnc.addEventListener("click", function () { copyText(state.output, copyEnc); });
+
+  /* Decode view */
+  var decIn = $("#dec-in"), decOut = $("#dec-out"), decStatus = $("#dec-status"),
+      copyDec = $("#copy-dec"), clearDec = $("#clear-dec");
+  var decoded = "";
+
+  function renderDecode() {
+    var text = decIn.value;
+    var msgs = [];
+    var status;
+    if (!text) {
+      status = "Paste an encoded emoji or a string of emoji above. The method is detected automatically.";
+    } else {
+      msgs = findHidden(text).filter(isReadable);
+      if (msgs.length) {
+        status = msgs.length === 1
+          ? "Found a message hidden in invisible characters."
+          : "Found " + msgs.length + " hidden messages.";
+      } else {
+        var r = readSpelled(text);
+        var s = r.bytes.length ? td.decode(new Uint8Array(r.bytes)) : "";
+        if (s && isReadable(s)) {
+          msgs = [s];
+          status = "Read as emoji spelling." + (r.skipped
+            ? " Skipped " + r.skipped + " " + plural(r.skipped, "character", "characters") + " outside the emoji alphabet."
+            : "");
+        } else {
+          status = "No message found. If you pasted a single emoji, the app you copied it from may have stripped the invisible characters.";
+        }
+      }
+    }
+    decStatus.textContent = status;
+    decOut.replaceChildren();
+    msgs.forEach(function (m) {
+      var p = document.createElement("p");
+      p.textContent = m;
+      decOut.appendChild(p);
+    });
+    decOut.hidden = !msgs.length;
+    decoded = msgs.join("\n\n");
+    copyDec.disabled = !decoded;
+    clearDec.disabled = !text;
+  }
+  decIn.addEventListener("input", renderDecode);
+  clearDec.addEventListener("click", function () { decIn.value = ""; renderDecode(); decIn.focus(); });
+  copyDec.addEventListener("click", function () { copyText(decoded, copyDec); });
+  toDec.addEventListener("click", function () {
+    decIn.value = state.output;
+    go("decode");
+    renderDecode();
+  });
+
+  /* Tabs and #encode / #decode links */
+  var tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  function show(view) {
+    tabs.forEach(function (t) {
+      var on = t.dataset.view === view;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  function go(view) {
+    show(view);
+    if (location.hash !== "#" + view) {
+      try { location.hash = view; } catch (e) { /* ignore */ }
+    }
+  }
+  tabs.forEach(function (t) { t.addEventListener("click", function () { go(t.dataset.view); }); });
+  $(".tabs").addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    var i = tabs.findIndex(function (t) { return t.getAttribute("aria-selected") === "true"; });
+    var next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    go(next.dataset.view);
+    next.focus();
+    e.preventDefault();
+  });
+  function fromHash() { return location.hash === "#decode" ? "decode" : "encode"; }
+  window.addEventListener("hashchange", function () { show(fromHash()); });
+
+  show(fromHash());
+  syncChips();
+  renderEncode();
+  renderDecode();
+})();
+</script>
+</body>
+</html>
