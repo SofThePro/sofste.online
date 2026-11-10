@@ -90,6 +90,26 @@ select.ghost{background:var(--surface);border:1px solid var(--line);border-radiu
 #tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;z-index:10;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 #tip b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
 #tip span{color:var(--text-2)}
+.hp-form{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;max-width:760px}
+@media(max-width:700px){.hp-form{grid-template-columns:1fr}}
+.hp-note{color:var(--text-2);margin:0 0 12px}
+.hp-card{display:grid;grid-template-columns:auto 1fr;gap:18px 26px;align-items:center;padding:8px 0 10px}
+.hp-card + .hp-card{border-top:1px solid var(--line);padding-top:18px}
+@media(max-width:700px){.hp-card{grid-template-columns:1fr}}
+.hp-left{display:flex;align-items:center;gap:18px}
+.hp-power{width:64px;height:64px;border-radius:50%;border:2px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hp-power svg{width:28px;height:28px}
+.hp-power.on{background:var(--series);border-color:var(--series);color:#fff}
+.hp-name{font-weight:600;font-size:16px}
+.hp-temps{color:var(--text-2);font-size:13px;font-variant-numeric:tabular-nums}
+.hp-right{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.hp-right.off{opacity:.45;pointer-events:none}
+.hp-set{display:flex;align-items:center;gap:10px}
+.hp-set button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);font-size:22px;line-height:1;cursor:pointer}
+.hp-set button:active{background:var(--series)}
+.hp-set .val{font-size:30px;font-weight:600;min-width:74px;text-align:center;font-variant-numeric:tabular-nums}
+.hp-group{display:flex;flex-direction:column;gap:4px}
+.hp-group .cap{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 footer{color:var(--muted);font-size:12px;margin-top:16px}
 </style>
 </head>
@@ -155,6 +175,15 @@ footer{color:var(--muted);font-size:12px;margin-top:16px}
     </div>
   </div>
 
+  <div class="panel" id="hpPanel">
+    <div class="panel-head">
+      <h2>Heat pump</h2>
+      <span class="total" id="hpStatus"></span>
+      <button class="btn ghost hidden" id="hpLogout">Disconnect</button>
+    </div>
+    <div id="hpBody"></div>
+  </div>
+
   <div class="panel">
     <div class="panel-head">
       <h2 id="usageTitle">Power usage</h2>
@@ -183,7 +212,7 @@ footer{color:var(--muted);font-size:12px;margin-top:16px}
     </div>
   </div>
 
-  <footer>Cost is what Tibber charges for the electricity itself (spot price + Tibber's markup, incl. VAT). Grid rent (nettleie) from your grid company and government power support are not included. Hourly usage can be delayed until Tibber receives it from your meter.</footer>
+  <footer>Cost is what Tibber charges for the electricity itself (spot price + Tibber's markup, incl. VAT). Grid rent (nettleie) from your grid company and government power support are not included. Hourly usage can be delayed until Tibber receives it from your meter. Heat pump changes can take a few seconds to show.</footer>
 </div>
 
 <div id="tip" class="hidden"></div>
@@ -288,6 +317,7 @@ function startApp(viewerData) {
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
   applyViewer(viewerData);
+  hpLoad();
   loadUsage();
   startLive();
   clearInterval(S.refreshTimer);
@@ -576,7 +606,7 @@ function renderLiveChart() {
 
 /* touch: a tap on a bar shows its value; a tap anywhere else clears it */
 document.addEventListener('pointerdown', ev => {
-  if (ev.target.closest && ev.target.closest('.hit, #lhit')) return;
+  if (ev.target.closest && ev.target.closest('.hit, #lhit')) { ev.target.dispatchEvent(new PointerEvent('pointermove', {clientX: ev.clientX, clientY: ev.clientY, pointerType: ev.pointerType})); return; }
   tipHide(); document.querySelectorAll('.bar').forEach(b => b.removeAttribute('opacity'));
   const lx = document.getElementById('lx'); if (lx) lx.setAttribute('visibility', 'hidden');
 }, true);
@@ -625,9 +655,231 @@ function demoLive() {
   clearInterval(S.demoTimer); S.demoTimer = setInterval(() => tick(Date.now()), 2000);
 }
 
+/* =====================================================================
+   Toshiba heat pump (Toshiba Home AC Control account)
+   Toshiba's service does not accept requests from web pages, so every
+   call goes through the relay that serves this page (/toshiba, /hub).
+   ===================================================================== */
+const RELAY = location.origin;
+const HP = {
+  auth: (() => { try { return JSON.parse(store.get('toshibaAuth') || 'null'); } catch (e) { return null; } })(),
+  devices: [], loaded: false, err: '', busy: false, timer: null, sendTimers: {}
+};
+class HpAuthError extends Error {}
+const hpSave = () => HP.auth ? store.set('toshibaAuth', JSON.stringify(HP.auth)) : store.del('toshibaAuth');
+const randHex = n => Array.from(crypto.getRandomValues(new Uint8Array(n / 2)), b => b.toString(16).padStart(2, '0')).join('');
+
+async function hpApi(path, {query, body, auth = true} = {}) {
+  if (DEMO) return demoHp(path, query, body);
+  const url = new URL(RELAY + '/toshiba' + path);
+  if (query) for (const k in query) url.searchParams.set(k, query[k]);
+  const headers = {'Content-Type': 'application/json'};
+  if (auth) headers.Authorization = (HP.auth.type || 'Bearer') + ' ' + HP.auth.token;
+  let res;
+  try { res = await fetch(url, {method: body ? 'POST' : 'GET', headers, body: body ? JSON.stringify(body) : undefined}); }
+  catch (e) { throw new Error('Could not reach the heat pump service. Check your internet connection.'); }
+  if (res.status === 401) throw new HpAuthError('Your Toshiba login has expired. Please connect again.');
+  if (res.status === 403) throw new Error('Toshiba is refusing requests right now (too many in a short time). Try again in a few minutes.');
+  if (res.status === 404 && !(res.headers.get('Content-Type') || '').includes('json')) throw new Error('This page is not running on the Cloudflare relay, so it cannot reach Toshiba.');
+  let j;
+  try { j = await res.json(); } catch (e) { throw new Error('Toshiba answered with an error (' + res.status + ').'); }
+  if (!j || !j.IsSuccess) {
+    if (j && j.StatusCode === 'InvalidUserNameorPassword') throw new HpAuthError('Wrong Toshiba email or password.');
+    throw new Error((j && j.Message) || 'Toshiba answered with an error (' + res.status + ').');
+  }
+  return j.ResObj;
+}
+
+/* State is a 38-character hex string. Layout (hex positions):
+   0 status · 2 mode · 4 set temp · 6 fan · 8 swing · 10 power sel · 12/13 merit B/A (half bytes)
+   14 air ion · 16 indoor temp · 18 outdoor temp · 28 self clean. "ff" = no value / leave unchanged. */
+function hpDecode(h) {
+  h = String(h || '').padEnd(38, 'f');
+  const b = i => parseInt(h.substr(i, 2), 16);
+  const temp = v => { v = v > 127 ? v - 256 : v; return (v === 127 || v === -128 || v === -1) ? null : (v === 126 ? -1 : v); };
+  return {on: b(0) === 0x30, mode: b(2), temp: temp(b(4)), fan: b(6), meritA: parseInt(h[13], 16), indoor: temp(b(16)), outdoor: temp(b(18))};
+}
+function hpEncode(c) {
+  const hx = v => v == null ? 'ff' : ((v + 256) % 256).toString(16).padStart(2, '0');
+  return hx(c.status) + hx(c.mode) + hx(c.temp) + hx(c.fan) + 'ffff' + 'ff' + 'ffffff' + 'ffffffff' + 'ff' + 'ffffffff';
+}
+const HP_MODES = [[0x43, 'Heat'], [0x42, 'Cool'], [0x41, 'Auto'], [0x44, 'Dry'], [0x45, 'Fan']];
+const HP_FANS = [[0x41, 'Auto'], [0x31, 'Quiet'], [0x32, '1'], [0x33, '2'], [0x34, '3'], [0x35, '4'], [0x36, '5']];
+const hp8c = s => s.mode === 0x43 && s.meritA === 0x04;          // 8 °C frost-guard heating: values are sent +16
+const hpShownTemp = s => s.temp == null ? null : (hp8c(s) ? s.temp - 16 : s.temp);
+const hpRange = s => hp8c(s) ? [5, 13] : [17, 30];
+
+async function hpLogin(username, password) {
+  const r = await hpApi('/api/Consumer/Login', {body: {Username: username, Password: password}, auth: false});
+  HP.auth = {token: r.access_token, type: r.token_type || 'Bearer', consumerId: r.consumerId, username, deviceId: username + '_' + randHex(16), sas: null};
+  hpSave();
+  await hpLoad();
+}
+function hpLogoutNow(msg) {
+  HP.auth = null; hpSave(); HP.devices = []; HP.loaded = false; HP.err = msg || '';
+  clearInterval(HP.timer); hpRender();
+}
+async function hpLoad() {
+  if (!HP.auth) { hpRender(); return; }
+  try {
+    const groups = await hpApi('/api/AC/GetConsumerACMapping', {query: {consumerId: HP.auth.consumerId}});
+    const old = HP.devices;
+    HP.devices = [];
+    for (const g of groups || []) for (const d of g.ACList || []) {
+      const prev = old.find(o => o.id === d.Id);
+      HP.devices.push({id: d.Id, uid: d.DeviceUniqueId, name: d.Name || 'Heat pump',
+        state: prev && Date.now() < prev.hold ? prev.state : hpDecode(d.ACStateData), hold: prev ? prev.hold : 0});
+    }
+    HP.loaded = true; HP.err = '';
+  } catch (e) {
+    if (e instanceof HpAuthError) { hpLogoutNow(e.message); return; }
+    HP.err = e.message;
+  }
+  hpRender();
+  clearInterval(HP.timer);
+  HP.timer = setInterval(hpPoll, 60000);
+}
+async function hpPoll() {
+  if (!HP.auth || document.hidden) return;
+  for (const d of HP.devices) {
+    try {
+      const r = await hpApi('/api/AC/GetCurrentACState', {query: {ACId: d.id, consumerId: HP.auth.consumerId}});
+      if (r && typeof r.ACStateData === 'string' && Date.now() >= d.hold) d.state = hpDecode(r.ACStateData);
+      HP.err = '';
+    } catch (e) {
+      if (e instanceof HpAuthError) { hpLogoutNow(e.message); return; }
+      HP.err = e.message;
+    }
+  }
+  hpRender();
+}
+
+async function hpSend(dev, cmd, retried) {
+  if (DEMO) return;
+  if (!HP.auth.sas) {
+    const r = await hpApi('/api/Consumer/RegisterMobileDevice', {body: {DeviceID: HP.auth.deviceId, DeviceType: '1', Username: HP.auth.username}});
+    if (!r || typeof r.SasToken !== 'string') throw new Error('Toshiba did not give this iPad permission to send commands.');
+    HP.auth.sas = r.SasToken; hpSave();
+  }
+  let sr = (/sr=([^&]+)/.exec(HP.auth.sas) || [])[1] || '';
+  try { sr = decodeURIComponent(sr); } catch (e) {}
+  const cut = sr.indexOf('/devices/');
+  if (cut < 0) throw new Error('Toshiba sent an unexpected reply; commands cannot be sent.');
+  const host = sr.slice(0, cut);
+  let id = sr.slice(cut + 9);
+  try { id = decodeURIComponent(id); } catch (e) {}
+  // The Toshiba cloud expects this exact text form (single quotes), as sent by the official app's protocol.
+  const msg = "{'sourceId': '" + HP.auth.deviceId + "', 'messageId': '0000000', 'targetId': ['" + dev.uid +
+    "'], 'cmd': 'CMD_FCU_TO_AC', 'payload': {'data': '" + hpEncode(cmd) + "'}, 'timeStamp': '0000000'}";
+  let res;
+  try {
+    res = await fetch(RELAY + '/hub/' + host + '/devices/' + encodeURIComponent(id) + '/messages/events?api-version=2020-03-13', {
+      method: 'POST',
+      headers: {'Authorization': HP.auth.sas, 'Content-Type': 'application/json', 'iothub-app-type': 'mob',
+        'iothub-contenttype': 'application/json', 'iothub-contentencoding': 'utf-8'},
+      body: msg});
+  } catch (e) { throw new Error('Could not reach the heat pump service. Check your internet connection.'); }
+  if (res.status === 401 && !retried) { HP.auth.sas = null; hpSave(); return hpSend(dev, cmd, true); }
+  if (!res.ok) throw new Error('The command was not accepted (error ' + res.status + ').');
+}
+/* Change the heat pump: update the screen at once, send after a short pause so quick taps become one command. */
+function hpChange(dev, change, delay) {
+  const s = dev.state;
+  if ('status' in change) s.on = change.status === 0x30;
+  if ('mode' in change) s.mode = change.mode;
+  if ('fan' in change) s.fan = change.fan;
+  if ('temp' in change) s.temp = change.temp;
+  dev.hold = Date.now() + 12000;                    // ignore older readings while the command travels
+  dev.queue = Object.assign(dev.queue || {}, change);
+  hpRender();
+  clearTimeout(HP.sendTimers[dev.id]);
+  HP.sendTimers[dev.id] = setTimeout(async () => {
+    const cmd = dev.queue; dev.queue = null;
+    try { await hpSend(dev, cmd); HP.err = ''; }
+    catch (e) {
+      if (e instanceof HpAuthError) { hpLogoutNow(e.message); return; }
+      HP.err = e.message; dev.hold = 0; hpPoll(); return;
+    }
+    hpRender();
+    setTimeout(hpPoll, 12500);
+  }, delay || 0);
+}
+
+const POWER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>';
+function hpRender() {
+  const body = $('hpBody'), st = $('hpStatus');
+  $('hpLogout').classList.toggle('hidden', !HP.auth);
+  st.textContent = HP.err && HP.auth ? HP.err : '';
+  st.style.color = HP.err ? 'var(--bad)' : '';
+  if (!HP.auth) {
+    body.innerHTML = `<p class="hp-note">Connect your Toshiba heat pump with the same email and password you use in the Toshiba Home AC Control app. You only do this once.</p>
+      <form class="hp-form" id="hpForm">
+        <input class="field" id="hpUser" type="email" placeholder="Toshiba email or username" autocomplete="username" autocapitalize="off" spellcheck="false">
+        <input class="field" id="hpPass" type="password" placeholder="Toshiba password" autocomplete="current-password">
+        <button class="btn" id="hpConnect" type="submit">${HP.busy ? 'Connecting…' : 'Connect'}</button>
+      </form>
+      <div class="err">${esc(HP.err)}</div>`;
+    return;
+  }
+  if (!HP.loaded) { body.innerHTML = `<div class="chart"><div class="empty" style="padding:24px 0">${HP.err ? 'Could not load the heat pump.' : 'Loading heat pump…'}</div></div>`; return; }
+  if (!HP.devices.length) { body.innerHTML = '<div class="chart"><div class="empty" style="padding:24px 0">No heat pump was found on this Toshiba account.</div></div>'; return; }
+  body.innerHTML = HP.devices.map(d => {
+    const s = d.state, t = hpShownTemp(s), deg = v => v == null ? '–' : v + '°';
+    const modeName = (HP_MODES.find(m => m[0] === s.mode) || [0, ''])[1];
+    return `<div class="hp-card" data-id="${esc(d.id)}">
+      <div class="hp-left">
+        <button class="hp-power ${s.on ? 'on' : ''}" data-act="power" aria-label="Power">${POWER_SVG}</button>
+        <div>
+          <div class="hp-name">${esc(d.name)} <span class="pill">${s.on ? 'On' + (modeName ? ' · ' + modeName : '') : 'Off'}</span></div>
+          <div class="hp-temps">Room ${deg(s.indoor)} · Outside ${deg(s.outdoor)}</div>
+        </div>
+      </div>
+      <div class="hp-right ${s.on ? '' : 'off'}">
+        <div class="hp-group"><span class="cap">Set to${hp8c(s) ? ' (8° mode)' : ''}</span>
+          <div class="hp-set"><button data-act="down" aria-label="Colder">−</button><span class="val">${deg(t)}</span><button data-act="up" aria-label="Warmer">+</button></div></div>
+        <div class="hp-group"><span class="cap">Mode</span>
+          <div class="seg">${HP_MODES.map(m => `<button data-act="mode" data-v="${m[0]}" class="${s.mode === m[0] ? 'active' : ''}">${m[1]}</button>`).join('')}</div></div>
+        <div class="hp-group"><span class="cap">Fan</span>
+          <div class="seg">${HP_FANS.map(f => `<button data-act="fan" data-v="${f[0]}" class="${s.fan === f[0] ? 'active' : ''}">${f[1]}</button>`).join('')}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+$('hpBody').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const u = $('hpUser').value.trim(), p = $('hpPass').value;
+  if (!u || !p) { HP.err = 'Type your Toshiba email and password first.'; hpRender(); return; }
+  HP.busy = true; HP.err = ''; $('hpConnect').textContent = 'Connecting…'; $('hpConnect').disabled = true;
+  try { await hpLogin(u, p); }
+  catch (e) { HP.err = e.message; HP.auth = null; hpSave(); }
+  HP.busy = false; hpRender();
+});
+$('hpBody').addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-act]'); if (!btn) return;
+  const dev = HP.devices.find(d => d.id === btn.closest('.hp-card').dataset.id); if (!dev) return;
+  const s = dev.state, act = btn.dataset.act;
+  if (act === 'power') hpChange(dev, {status: s.on ? 0x31 : 0x30});
+  else if (act === 'mode') hpChange(dev, {mode: +btn.dataset.v});
+  else if (act === 'fan') hpChange(dev, {fan: +btn.dataset.v});
+  else {
+    const [lo, hi] = hpRange(s), off = hp8c(s) ? 16 : 0;
+    const cur = hpShownTemp(s) == null ? (hp8c(s) ? 8 : 21) : hpShownTemp(s);
+    const next = Math.min(hi, Math.max(lo, cur + (act === 'up' ? 1 : -1)));
+    hpChange(dev, {temp: next + off}, 900);
+  }
+});
+$('hpLogout').addEventListener('click', () => hpLogoutNow(''));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && HP.auth && HP.loaded) hpPoll(); });
+
+function demoHp(path, query, body) {
+  if (path.includes('Login')) return Promise.resolve({access_token: 'demo', token_type: 'bearer', consumerId: 'demo'});
+  if (path.includes('Mapping')) return Promise.resolve([{ACList: [{Id: 'ac1', DeviceUniqueId: 'uid1', Name: 'Stue', ACStateData: '304316413164001016037f7f7f7f10ffffffff'}]}]);
+  return Promise.resolve({ACStateData: '304316413164001016037f7f7f7f10ffffffff'});
+}
+
 /* ---------- boot ---------- */
 (async function boot() {
-  if (DEMO) S.token = 'demo';
+  if (DEMO) { S.token = 'demo'; if (/hp/.test(location.search)) HP.auth = {token: 'demo', type: 'bearer', consumerId: 'demo', username: 'demo', deviceId: 'demo_0', sas: null}; }
   if (!S.token) { showLogin(''); return; }
   try { startApp(await gql(Q_VIEWER)); }
   catch (e) {
