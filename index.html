@@ -660,7 +660,13 @@ function demoLive() {
    Toshiba's service does not accept requests from web pages, so every
    call goes through the relay that serves this page (/toshiba, /hub).
    ===================================================================== */
-const RELAY = location.origin;
+const ON_WORKER = /\.workers\.dev$/i.test(location.hostname) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+let RELAY = ON_WORKER ? location.origin : (store.get('toshibaRelay') || '');
+function relayClean(v) {
+  v = String(v || '').trim(); if (!v) return '';
+  if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+  try { return new URL(v).origin; } catch (e) { return ''; }
+}
 const HP = {
   auth: (() => { try { return JSON.parse(store.get('toshibaAuth') || 'null'); } catch (e) { return null; } })(),
   devices: [], loaded: false, err: '', busy: false, timer: null, sendTimers: {}
@@ -671,16 +677,17 @@ const randHex = n => Array.from(crypto.getRandomValues(new Uint8Array(n / 2)), b
 
 async function hpApi(path, {query, body, auth = true} = {}) {
   if (DEMO) return demoHp(path, query, body);
+  if (!RELAY) throw new Error('Type your Cloudflare address first.');
   const url = new URL(RELAY + '/toshiba' + path);
   if (query) for (const k in query) url.searchParams.set(k, query[k]);
   const headers = {'Content-Type': 'application/json'};
   if (auth) headers.Authorization = (HP.auth.type || 'Bearer') + ' ' + HP.auth.token;
   let res;
   try { res = await fetch(url, {method: body ? 'POST' : 'GET', headers, body: body ? JSON.stringify(body) : undefined}); }
-  catch (e) { throw new Error('Could not reach the heat pump service. Check your internet connection.'); }
+  catch (e) { throw new Error(ON_WORKER ? 'Could not reach the heat pump service. Check your internet connection.' : 'Could not reach your Cloudflare relay. Check that the address is right and that the newest cloudflare-worker.txt is deployed there.'); }
   if (res.status === 401) throw new HpAuthError('Your Toshiba login has expired. Please connect again.');
   if (res.status === 403) throw new Error('Toshiba is refusing requests right now (too many in a short time). Try again in a few minutes.');
-  if (res.status === 404 && !(res.headers.get('Content-Type') || '').includes('json')) throw new Error('This page is not running on the Cloudflare relay, so it cannot reach Toshiba.');
+  if (res.status === 404 && !(res.headers.get('Content-Type') || '').includes('json')) throw new Error('That address is not the Cloudflare relay. Check the address.');
   let j;
   try { j = await res.json(); } catch (e) { throw new Error('Toshiba answered with an error (' + res.status + ').'); }
   if (!j || !j.IsSuccess) {
@@ -812,8 +819,9 @@ function hpRender() {
   st.textContent = HP.err && HP.auth ? HP.err : '';
   st.style.color = HP.err ? 'var(--bad)' : '';
   if (!HP.auth) {
-    body.innerHTML = `<p class="hp-note">Connect your Toshiba heat pump with the same email and password you use in the Toshiba Home AC Control app. You only do this once.</p>
-      <form class="hp-form" id="hpForm">
+    body.innerHTML = `<p class="hp-note">Connect your Toshiba heat pump with the same email and password you use in the Toshiba Home AC Control app${ON_WORKER ? '' : ', plus the address of your Cloudflare relay'}. You only do this once.</p>
+      <form class="hp-form" id="hpForm" novalidate>
+        ${ON_WORKER ? '' : `<input class="field" id="hpRelay" style="grid-column:1/-1" type="text" inputmode="url" placeholder="Your Cloudflare address, e.g. tibber-power.yourname.workers.dev" value="${esc(RELAY.replace(/^https:\/\//, ''))}" autocapitalize="off" spellcheck="false">`}
         <input class="field" id="hpUser" type="email" placeholder="Toshiba email or username" autocomplete="username" autocapitalize="off" spellcheck="false">
         <input class="field" id="hpPass" type="password" placeholder="Toshiba password" autocomplete="current-password">
         <button class="btn" id="hpConnect" type="submit">${HP.busy ? 'Connecting…' : 'Connect'}</button>
@@ -848,6 +856,11 @@ function hpRender() {
 $('hpBody').addEventListener('submit', async ev => {
   ev.preventDefault();
   const u = $('hpUser').value.trim(), p = $('hpPass').value;
+  if (!ON_WORKER) {
+    RELAY = relayClean($('hpRelay').value);
+    if (!RELAY) { HP.err = 'Type your Cloudflare address first (it ends with workers.dev).'; hpRender(); return; }
+    store.set('toshibaRelay', RELAY);
+  }
   if (!u || !p) { HP.err = 'Type your Toshiba email and password first.'; hpRender(); return; }
   HP.busy = true; HP.err = ''; $('hpConnect').textContent = 'Connecting…'; $('hpConnect').disabled = true;
   try { await hpLogin(u, p); }
