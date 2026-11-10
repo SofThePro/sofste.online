@@ -1,620 +1,642 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<title>Tibber Power</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Emoji encoder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tibber Power">
+<meta name="theme-color" content="#111110">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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">
 <style>
-:root {
-  --bg: #EFEDF9;
-  --surface: #FFFFFF;
-  --ink: #1F1C4D;
-  --muted: #5E5A8A;
-  --line: #D9D5EE;
-  --indigo: #4B48C8;
-  --amber: #B97A00;
-  --sun: #FFC83D;
-  --sun-ink: #1F1C4D;
-  --display: "Fredoka", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
-  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
-  color-scheme: light;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+:root{
+  color-scheme:dark;
+  --bg:#111110; --surface:#1a1a19; --surface-2:#232321; --line:#2f2f2c;
+  --text:#f0efec; --text-2:#c3c2b7; --muted:#8b8a82;
+  --series:#3987e5; --series-dim:#27528a; --now:#f0efec;
+  --good:#199e70; --warn:#c98500; --bad:#e66767;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #16142E;
-    --surface: #221F44;
-    --ink: #EEECFF;
-    --muted: #ABA7D6;
-    --line: #3A3666;
-    --indigo: #A3A1FF;
-    --amber: #FFC83D;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #16142E;
-  --surface: #221F44;
-  --ink: #EEECFF;
-  --muted: #ABA7D6;
-  --line: #3A3666;
-  --indigo: #A3A1FF;
-  --amber: #FFC83D;
-  color-scheme: dark;
-}
-*, *::before, *::after { box-sizing: inherit; }
-[hidden] { display: none !important; }
-html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--body);
-  font-size: 1.0625rem;
-  line-height: 1.55;
-}
-main {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: clamp(1.5rem, 5vw, 3.5rem) max(1.25rem, env(safe-area-inset-right, 0px)) 4rem max(1.25rem, env(safe-area-inset-left, 0px));
-}
-h1 {
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(2.4rem, 7vw, 3.6rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  margin: 0 0 0.6rem;
-}
-.lede { margin: 0 0 1.75rem; color: var(--muted); max-width: 36rem; }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,"Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
 
-/* Encode / Decode tabs */
-.tabs {
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  margin-bottom: 1.5rem;
-}
-.tabs button {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 1.05rem;
-  color: var(--muted);
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  padding: 0.5rem 1.35rem;
-  cursor: pointer;
-}
-.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
+/* ---------- login ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:440px;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.logo svg{width:40px;height:40px}
+.logo h1{font-size:22px;margin:0;font-weight:600}
+.login-card p{color:var(--text-2);margin:0 0 14px}
+.steps{margin:0 0 18px;padding-left:20px;color:var(--text-2)}
+.steps li{margin-bottom:6px}
+.field{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px;outline:none}
+.field:focus{border-color:var(--series)}
+.btn{background:var(--series);border:0;border-radius:8px;padding:11px 16px;font-weight:600;color:#fff;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text-2);font-weight:500;padding:7px 12px}
+.btn.ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn.wide{width:100%;margin-top:12px}
+a.link{color:var(--series);text-decoration:none}
+a.link:hover{text-decoration:underline}
+.err{color:var(--bad);margin-top:12px;min-height:20px}
+.small{font-size:12px;color:var(--muted)}
 
-/* Method choice */
-.methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-.method {
-  text-align: left;
-  font: inherit;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 18px;
-  padding: 0.85rem 1rem;
-  cursor: pointer;
-}
-.method[aria-pressed="true"] {
-  border-color: var(--sun);
-  background: color-mix(in srgb, var(--sun) 20%, var(--surface));
-}
-.method-name { display: block; font-family: var(--display); font-weight: 500; font-size: 1.05rem; }
-.method-desc { display: block; color: var(--muted); font-size: 0.92rem; line-height: 1.45; margin-top: 0.2rem; }
+/* ---------- app ---------- */
+#app{max-width:1280px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))}
+.chart{touch-action:pan-y}
+.btn.ghost,select.ghost{padding:10px 14px}
+.seg button{padding:8px 14px}
+.field{font-size:16px}
+header{flex-wrap:wrap}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+header .logo{margin:0;flex:1}
+header .logo svg{width:30px;height:30px}
+header .logo h1{font-size:18px}
+header .home{color:var(--text-2);font-weight:400;font-size:14px;margin-left:6px}
+select.ghost{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+#banner{background:#3a2020;border:1px solid #5c2d2d;color:#f3c4c4;border-radius:8px;padding:10px 14px;margin-bottom:14px}
 
-/* Fields */
-.field { margin-top: 1.5rem; }
-.field > label, .label {
-  display: block;
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 1.05rem;
-  margin-bottom: 0.45rem;
-}
-textarea, .custom {
-  width: 100%;
-  font: inherit;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 14px;
-  padding: 0.8rem 1rem;
-}
-textarea { min-height: 6.5rem; resize: vertical; }
-textarea::placeholder, .custom::placeholder { color: var(--muted); opacity: 0.85; }
-textarea:focus, .custom:focus {
-  outline: none;
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--indigo) 25%, transparent);
-}
-:focus-visible { outline: 3px solid var(--indigo); outline-offset: 2px; }
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile,.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.tile{padding:16px 18px;min-height:118px}
+.tile .label{color:var(--text-2);font-size:13px;display:flex;align-items:center;gap:8px}
+.tile .big{font-size:32px;font-weight:600;letter-spacing:-.5px;margin-top:6px;font-variant-numeric:tabular-nums}
+.tile .big small{font-size:15px;font-weight:500;color:var(--text-2);margin-left:4px;letter-spacing:0}
+.tile .sub{color:var(--muted);font-size:13px;margin-top:2px;font-variant-numeric:tabular-nums}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.on{background:var(--good);box-shadow:0 0 0 3px rgba(25,158,112,.2)}
+.pill{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--text-2)}
 
-/* Carrier picker */
-.carriers { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-.carrier {
-  width: 2.9rem;
-  height: 2.9rem;
-  font-family: var(--emoji);
-  font-size: 1.55rem;
-  line-height: 1;
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 12px;
-  cursor: pointer;
-  padding: 0;
-}
-.carrier:hover { border-color: var(--muted); }
-.carrier[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); }
-.custom { width: 7.5rem; height: 2.9rem; padding: 0 0.8rem; border-radius: 12px; }
-
-/* Result stage */
-.stage {
-  margin-top: 1.5rem;
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 28px;
-  padding: clamp(1.25rem, 4vw, 2rem);
-  text-align: center;
-}
-.big {
-  display: inline-block;
-  max-width: 100%;
-  font-family: var(--emoji);
-  font-size: clamp(5.5rem, 24vw, 9rem);
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-  -webkit-user-select: all;
-  user-select: all;
-}
-.big.pop { animation: pop 0.28s ease-out; }
-@keyframes pop {
-  0% { transform: scale(0.82); }
-  60% { transform: scale(1.06); }
-  100% { transform: scale(1); }
-}
-.barcode {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 4px 2px;
-  min-height: 2rem;
-  max-width: 32rem;
-  margin: 0.75rem auto 0;
-}
-.bar { width: 4px; border-radius: 2px; background: var(--indigo); }
-.bar.multi { background: var(--amber); }
-.more { align-self: center; margin-left: 0.4rem; font-size: 0.85rem; color: var(--muted); }
-.spelled {
-  font-family: var(--emoji);
-  font-size: 1.7rem;
-  line-height: 1.55;
-  text-align: left;
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  max-height: 18rem;
-  overflow: auto;
-  -webkit-user-select: all;
-  user-select: all;
-}
-.spelled:empty::before {
-  content: attr(data-empty);
-  font-family: var(--body);
-  font-size: 1rem;
-  color: var(--muted);
-}
-.meta { margin: 0.9rem 0 0; color: var(--muted); font-size: 0.95rem; }
-.actions { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.2rem; }
-.btn {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 1rem;
-  padding: 0.65rem 1.35rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--ink);
-  background: var(--ink);
-  color: var(--surface);
-  cursor: pointer;
-}
-.btn.quiet { background: transparent; color: var(--ink); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.notes p { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.95rem; }
-
-/* Decode result */
-.stage.result { text-align: left; }
-.status { margin: 0; color: var(--muted); }
-.decoded { margin-top: 0.85rem; }
-.decoded p {
-  margin: 0;
-  font-size: 1.2rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.decoded p + p { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1.5px dashed var(--line); }
-.stage.result .actions { justify-content: flex-start; }
-
-/* How it works */
-.how { margin-top: 2.5rem; border-top: 1.5px solid var(--line); padding-top: 1rem; }
-.how summary { font-family: var(--display); font-weight: 500; font-size: 1.05rem; cursor: pointer; }
-.how p { color: var(--muted); margin: 0.75rem 0 0; }
-
-@media (max-width: 540px) {
-  .methods { grid-template-columns: 1fr; }
-  .tabs { display: flex; }
-  .tabs button { flex: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-}
+.panel{padding:16px 18px 12px;margin-bottom:14px}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.panel-head h2{font-size:15px;font-weight:600;margin:0;flex:1;white-space:nowrap}
+.panel-head .total{color:var(--text-2);font-size:13px;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{background:transparent;border:0;border-radius:6px;padding:5px 12px;color:var(--text-2);cursor:pointer}
+.seg button.active{background:var(--surface-2);color:var(--text)}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%}
+.chart .empty{color:var(--muted);padding:60px 0;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.grid2 .panel{margin-bottom:0}
+#tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;z-index:10;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+#tip b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
+#tip span{color:var(--text-2)}
+footer{color:var(--muted);font-size:12px;margin-top:16px}
 </style>
 </head>
 <body>
-<main>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" class="hidden">
+  <div class="login-card">
+    <div class="logo">
+      <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#3987e5"/><path d="M36 8 16 36h13l-3 20 22-30H34z" fill="#fff"/></svg>
+      <h1>Tibber Power</h1>
+    </div>
+    <p>Log in with your Tibber account to see your power usage and cost. You only do this once.</p>
+    <ol class="steps">
+      <li><a class="link" href="https://developer.tibber.com/settings/access-token" target="_blank" rel="noopener">Open Tibber's login page</a> and sign in with your normal Tibber email and password.</li>
+      <li>Copy the <b>access token</b> it shows you.</li>
+      <li>Paste it below.</li>
+    </ol>
+    <form id="loginForm">
+      <input id="tokenInput" class="field" type="password" placeholder="Paste your Tibber access token" autocomplete="off" spellcheck="false">
+      <button id="loginBtn" class="btn wide" type="submit">Log in</button>
+    </form>
+    <div id="loginErr" class="err"></div>
+    <div class="small">The token is stored only on this iPad and is sent only to Tibber.</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
   <header>
-    <h1>Emoji encoder</h1>
-    <p class="lede">Hide a message inside a single emoji, or spell it out in emoji. Everything runs in your browser and nothing is sent anywhere.</p>
+    <div class="logo">
+      <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#3987e5"/><path d="M36 8 16 36h13l-3 20 22-30H34z" fill="#fff"/></svg>
+      <h1>Tibber Power <span class="home" id="homeName"></span></h1>
+    </div>
+    <span class="small" id="updated"></span>
+    <select id="homeSelect" class="ghost hidden"></select>
+    <button class="btn ghost" id="refreshBtn">Refresh</button>
+    <button class="btn ghost" id="logoutBtn">Log out</button>
   </header>
 
-  <div class="tabs" role="tablist" aria-label="Mode">
-    <button type="button" role="tab" id="tab-encode" aria-controls="panel-encode" aria-selected="true" data-view="encode">Encode</button>
-    <button type="button" role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false" data-view="decode" tabindex="-1">Decode</button>
+  <div id="banner" class="hidden"></div>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label"><span class="dot" id="liveDot"></span>Using right now</div>
+      <div class="big" id="liveW">–</div>
+      <div class="sub" id="liveSub"></div>
+    </div>
+    <div class="tile">
+      <div class="label">Price right now <span class="pill hidden" id="priceLevel"></span></div>
+      <div class="big" id="priceNow">–</div>
+      <div class="sub" id="priceSub"></div>
+    </div>
+    <div class="tile">
+      <div class="label">Today</div>
+      <div class="big" id="todayCost">–</div>
+      <div class="sub" id="todayKwh"></div>
+    </div>
+    <div class="tile">
+      <div class="label" id="monthLabel">This month</div>
+      <div class="big" id="monthCost">–</div>
+      <div class="sub" id="monthKwh"></div>
+    </div>
   </div>
 
-  <section id="panel-encode" role="tabpanel" aria-labelledby="tab-encode">
-    <div class="methods" role="group" aria-label="Encoding method">
-      <button type="button" class="method" data-method="hide" aria-pressed="true">
-        <span class="method-name">Hide in one emoji</span>
-        <span class="method-desc">Looks like a single emoji. The message rides along as invisible characters.</span>
-      </button>
-      <button type="button" class="method" data-method="spell" aria-pressed="false">
-        <span class="method-name">Spell in emoji</span>
-        <span class="method-desc">Turns every byte into a visible emoji. Anyone with this page can read it back.</span>
-      </button>
-    </div>
-
-    <div class="field">
-      <label for="msg">Your message</label>
-      <textarea id="msg" rows="4" placeholder="Type something to encode" spellcheck="false">Meet me by the big oak at noon.</textarea>
-    </div>
-
-    <div class="field" id="carrier-field">
-      <span class="label" id="carrier-label">Carrier emoji</span>
-      <div class="carriers" id="carriers" role="group" aria-labelledby="carrier-label">
-        <input id="custom" class="custom" type="text" maxlength="16" placeholder="Your own" aria-label="Your own carrier emoji or text" autocomplete="off">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="usageTitle">Power usage</h2>
+      <span class="total" id="usageTotal"></span>
+      <div class="seg" id="unitSeg">
+        <button data-v="kwh" class="active">kWh</button>
+        <button data-v="cost">Cost (kr)</button>
+      </div>
+      <div class="seg" id="resSeg">
+        <button data-v="HOURLY" class="active">Hours</button>
+        <button data-v="DAILY">Days</button>
+        <button data-v="MONTHLY">Months</button>
       </div>
     </div>
+    <div class="chart" id="usageChart"></div>
+  </div>
 
-    <div class="stage">
-      <div id="hide-view">
-        <div class="big" id="big"></div>
-        <div class="barcode" id="barcode" aria-hidden="true"></div>
-      </div>
-      <div id="spell-view" hidden>
-        <div class="spelled" id="spelled" data-empty="Type a message to see it in emoji."></div>
-      </div>
-      <p class="meta" id="enc-meta" aria-live="polite"></p>
-      <div class="actions">
-        <button type="button" class="btn" id="copy-enc" data-label="Copy" disabled>Copy</button>
-        <button type="button" class="btn quiet" id="to-decoder" disabled>Test in decoder</button>
-      </div>
+  <div class="grid2">
+    <div class="panel" id="livePanel">
+      <div class="panel-head"><h2>Live power (watts)</h2><span class="total" id="liveRange"></span></div>
+      <div class="chart" id="liveChart"></div>
     </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Electricity price (kr/kWh)</h2><span class="total" id="priceRange"></span></div>
+      <div class="chart" id="priceChart"></div>
+    </div>
+  </div>
 
-    <div class="notes" id="hide-note">
-      <p>Each bar is one hidden byte, taller for higher values. Amber bars come from characters outside plain ASCII, like é or 🎉.</p>
-      <p>Some apps strip invisible characters when you paste, which erases the message. If the person you send it to sees only the emoji, try another app.</p>
-    </div>
-  </section>
+  <footer>Cost is what Tibber charges for the electricity itself (spot price + Tibber's markup, incl. VAT). Grid rent (nettleie) from your grid company and government power support are not included. Hourly usage can be delayed until Tibber receives it from your meter.</footer>
+</div>
 
-  <section id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
-    <div class="field">
-      <label for="dec-in">Paste encoded text</label>
-      <textarea id="dec-in" rows="4" placeholder="Paste an emoji with a hidden message, or a string of emoji" spellcheck="false"></textarea>
-    </div>
-    <div class="stage result">
-      <p class="status" id="dec-status" aria-live="polite"></p>
-      <div class="decoded" id="dec-out" hidden></div>
-      <div class="actions">
-        <button type="button" class="btn" id="copy-dec" data-label="Copy message" disabled>Copy message</button>
-        <button type="button" class="btn quiet" id="clear-dec" disabled>Clear</button>
-      </div>
-    </div>
-  </section>
-
-  <details class="how">
-    <summary>How it works</summary>
-    <p>Unicode has 256 variation selectors, invisible characters meant to pick between styles of the same symbol. Your message is turned into UTF-8 bytes, each byte becomes one of those selectors, and they’re attached right after the carrier emoji. Most apps show only the emoji but keep the hidden characters when you copy and paste.</p>
-    <p>Spelling mode uses a fixed alphabet of 256 emoji instead, one per byte, so the result is visible and anyone can decode it here. Neither method is encryption, so don’t use them for secrets that matter.</p>
-  </details>
-</main>
+<div id="tip" class="hidden"></div>
 
 <script>
-(function () {
-  "use strict";
-  var $ = function (s) { return document.querySelector(s); };
-  var te = new TextEncoder();
-  var td = new TextDecoder();
-  var plural = function (n, one, many) { return n === 1 ? one : many; };
+'use strict';
+const API = 'https://api.tibber.com/v1-beta/gql';
+const DEMO = /[?&]demo/.test(location.search);
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
 
-  /* Hidden mode: one byte <-> one variation selector */
-  function byteToVS(b) {
-    return String.fromCodePoint(b < 16 ? 0xFE00 + b : 0xE0100 + b - 16);
-  }
-  function vsToByte(cp) {
-    if (cp >= 0xFE00 && cp <= 0xFE0F) return cp - 0xFE00;
-    if (cp >= 0xE0100 && cp <= 0xE01EF) return cp - 0xE0100 + 16;
-    return null;
-  }
-  function findHidden(text) {
-    var runs = [], cur = [];
-    for (var ch of text) {
-      var b = vsToByte(ch.codePointAt(0));
-      if (b === null) { if (cur.length) runs.push(cur); cur = []; }
-      else cur.push(b);
-    }
-    if (cur.length) runs.push(cur);
-    var out = [];
-    runs.forEach(function (run) {
-      var i = 0;
-      while (i < run.length && run[i] === 0x0F) i++; // a leading VS16 belongs to the emoji itself
-      if (i < run.length) out.push(td.decode(new Uint8Array(run.slice(i))));
+const S = {
+  token: store.get('tibberToken'),
+  homeId: store.get('tibberHome'),
+  homes: [], wsUrl: null,
+  res: 'HOURLY', unit: 'kwh',
+  usage: {HOURLY: null, DAILY: null, MONTHLY: null},
+  live: null, livePoints: [], ws: null, wsRetry: 0, wsTimer: null,
+  refreshTimer: null
+};
+
+/* ---------- formatting ---------- */
+const nf = (n, d=2) => n == null || isNaN(n) ? '–' : n.toLocaleString('en-GB', {minimumFractionDigits: d, maximumFractionDigits: d});
+const kr = n => n == null ? '–' : nf(n, 2) + ' kr';
+const kwh = n => n == null ? '–' : nf(n, n >= 100 ? 0 : 1) + ' kWh';
+const fmtTime = d => d.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+const fmtDay = d => d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'});
+const fmtWeekday = d => d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
+const fmtMonth = d => d.toLocaleDateString('en-GB', {month: 'short', year: '2-digit'});
+const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- API ---------- */
+class AuthError extends Error {}
+async function gql(query, token = S.token) {
+  if (DEMO) return demoApi(query);
+  let res;
+  try {
+    res = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+      body: JSON.stringify({query})
     });
-    return out;
+  } catch (e) { throw new Error('Could not reach Tibber. Check your internet connection.'); }
+  if (res.status === 401 || res.status === 403) throw new AuthError('Tibber did not accept that token.');
+  let json;
+  try { json = await res.json(); } catch (e) { throw new Error('Tibber answered with an error (' + res.status + ').'); }
+  if (json.errors && json.errors.length) {
+    const e = json.errors[0];
+    const code = e.extensions && e.extensions.code;
+    if (code === 'UNAUTHENTICATED' || /invalid token|unauth/i.test(e.message || '')) throw new AuthError('Tibber did not accept that token.');
+    if (!json.data) throw new Error(e.message || 'Tibber answered with an error.');
   }
+  return json.data;
+}
 
-  /* Spelling mode: a fixed alphabet of 256 single-code-point emoji */
-  var RANGES = [[0x1F600, 0x1F64F], [0x1F400, 0x1F43E], [0x1F345, 0x1F37C], [0x1F680, 0x1F6C5]];
-  var ALPHA = [];
-  RANGES.forEach(function (r) {
-    for (var c = r[0]; c <= r[1] && ALPHA.length < 256; c++) ALPHA.push(String.fromCodePoint(c));
-  });
-  var REV = new Map(ALPHA.map(function (e, i) { return [e.codePointAt(0), i]; }));
-  function readSpelled(text) {
-    var bytes = [], skipped = 0;
-    for (var ch of text) {
-      var cp = ch.codePointAt(0);
-      if (REV.has(cp)) bytes.push(REV.get(cp));
-      else if (cp === 0xFE0F || cp === 0x200D || /\s/.test(ch)) continue;
-      else skipped++;
+const Q_VIEWER = `{ viewer { name websocketSubscriptionUrl homes { id appNickname address { address1 }
+  features { realTimeConsumptionEnabled }
+  currentSubscription { priceInfo {
+    current { total startsAt level }
+    today { total startsAt level }
+    tomorrow { total startsAt level } } } } } }`;
+const qUsage = (id, res, n) => `{ viewer { home(id: "${id}") { consumption(resolution: ${res}, last: ${n}) {
+  nodes { from to cost consumption unitPrice currency } } } } }`;
+const USAGE_N = {HOURLY: 48, DAILY: 31, MONTHLY: 12};
+
+/* ---------- login / logout ---------- */
+function showLogin(msg) {
+  stopLive(); clearInterval(S.refreshTimer);
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginErr').textContent = msg || '';
+  $('tokenInput').value = '';
+  $('tokenInput').focus();
+}
+$('loginForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const t = $('tokenInput').value.trim().replace(/^Bearer\s+/i, '');
+  if (!t) { $('loginErr').textContent = 'Paste your token first.'; return; }
+  $('loginBtn').disabled = true; $('loginBtn').textContent = 'Logging in…'; $('loginErr').textContent = '';
+  try {
+    const data = await gql(Q_VIEWER, t);
+    if (!data.viewer.homes || !data.viewer.homes.length) throw new Error('No home was found on this Tibber account.');
+    S.token = t; store.set('tibberToken', t);
+    startApp(data);
+  } catch (e) {
+    $('loginErr').textContent = e instanceof AuthError ? 'That token did not work. Copy it again from the Tibber page and try once more.' : e.message;
+  } finally { $('loginBtn').disabled = false; $('loginBtn').textContent = 'Log in'; }
+});
+$('logoutBtn').addEventListener('click', () => {
+  store.del('tibberToken'); store.del('tibberHome');
+  S.token = null; S.homeId = null;
+  showLogin('');
+});
+
+/* ---------- app start ---------- */
+function startApp(viewerData) {
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  applyViewer(viewerData);
+  loadUsage();
+  startLive();
+  clearInterval(S.refreshTimer);
+  S.refreshTimer = setInterval(refreshAll, 5 * 60 * 1000);
+}
+function applyViewer(data) {
+  S.homes = data.viewer.homes; S.wsUrl = data.viewer.websocketSubscriptionUrl;
+  if (!S.homes.find(h => h.id === S.homeId)) S.homeId = S.homes[0].id;
+  store.set('tibberHome', S.homeId);
+  const sel = $('homeSelect');
+  sel.innerHTML = S.homes.map(h => `<option value="${esc(h.id)}">${esc(homeLabel(h))}</option>`).join('');
+  sel.value = S.homeId;
+  sel.classList.toggle('hidden', S.homes.length < 2);
+  $('homeName').textContent = S.homes.length < 2 ? '· ' + homeLabel(home()) : '';
+  renderPrice();
+  renderLiveTile();
+}
+const home = () => S.homes.find(h => h.id === S.homeId);
+const homeLabel = h => h.appNickname || (h.address && h.address.address1) || 'My home';
+const hasLive = () => !!(home() && home().features && home().features.realTimeConsumptionEnabled);
+
+$('homeSelect').addEventListener('change', e => {
+  S.homeId = e.target.value; store.set('tibberHome', S.homeId);
+  S.usage = {HOURLY: null, DAILY: null, MONTHLY: null}; S.live = null; S.livePoints = [];
+  renderPrice(); renderLiveTile(); renderTotals(); renderUsage(); renderLiveChart();
+  loadUsage(); stopLive(); startLive();
+});
+$('refreshBtn').addEventListener('click', refreshAll);
+
+async function refreshAll() {
+  try {
+    applyViewer(await gql(Q_VIEWER));
+    await loadUsage();
+  } catch (e) { handleErr(e); }
+}
+function handleErr(e) {
+  if (e instanceof AuthError) { store.del('tibberToken'); S.token = null; showLogin('Your Tibber login has expired. Please log in again.'); return; }
+  $('banner').textContent = e.message; $('banner').classList.remove('hidden');
+}
+
+async function loadUsage() {
+  try {
+    const id = S.homeId;
+    const [h, d, m] = await Promise.all(['HOURLY', 'DAILY', 'MONTHLY'].map(r => gql(qUsage(id, r, USAGE_N[r]))));
+    if (id !== S.homeId) return;
+    const nodes = x => ((((x.viewer || {}).home || {}).consumption || {}).nodes || [])
+      .map(n => ({from: new Date(n.from), to: new Date(n.to), kwh: n.consumption, cost: n.cost, price: n.unitPrice}));
+    S.usage = {HOURLY: nodes(h), DAILY: nodes(d), MONTHLY: nodes(m)};
+    $('banner').classList.add('hidden');
+    $('updated').textContent = 'Updated ' + fmtTime(new Date());
+  } catch (e) { handleErr(e); }
+  renderTotals(); renderUsage();
+}
+
+/* ---------- tiles ---------- */
+function renderPrice() {
+  const pi = home() && home().currentSubscription && home().currentSubscription.priceInfo;
+  const lvl = $('priceLevel');
+  if (!pi || !pi.current) { $('priceNow').textContent = '–'; $('priceSub').textContent = 'No price info'; lvl.classList.add('hidden'); renderPriceChart([]); return; }
+  $('priceNow').innerHTML = nf(pi.current.total, 2) + '<small>kr/kWh</small>';
+  const names = {VERY_CHEAP: 'Very cheap', CHEAP: 'Cheap', NORMAL: 'Normal', EXPENSIVE: 'Expensive', VERY_EXPENSIVE: 'Very expensive'};
+  if (names[pi.current.level]) { lvl.textContent = names[pi.current.level]; lvl.classList.remove('hidden'); } else lvl.classList.add('hidden');
+  const today = (pi.today || []).map(p => p.total);
+  $('priceSub').textContent = today.length ? `Today ${nf(Math.min(...today))} – ${nf(Math.max(...today))} kr` : '';
+  renderPriceChart([...(pi.today || []), ...(pi.tomorrow || [])]);
+}
+
+function todayFromHours() {
+  const now = new Date(), hrs = (S.usage.HOURLY || []).filter(n => sameDay(n.from, now) && n.kwh != null);
+  if (!hrs.length) return null;
+  return {kwh: hrs.reduce((a, n) => a + n.kwh, 0), cost: hrs.reduce((a, n) => a + (n.cost || 0), 0)};
+}
+function renderTotals() {
+  const now = new Date();
+  let today = null, src = '';
+  if (S.live && S.live.accumulatedConsumption != null) today = {kwh: S.live.accumulatedConsumption, cost: S.live.accumulatedCost};
+  else today = todayFromHours();
+  if (today) {
+    $('todayCost').textContent = today.cost == null ? '–' : kr(today.cost);
+    $('todayKwh').textContent = kwh(today.kwh) + ' so far';
+  } else {
+    $('todayCost').textContent = '–';
+    $('todayKwh').textContent = S.usage.HOURLY ? "Tibber hasn't got today's meter data yet" : '';
+  }
+  $('monthLabel').textContent = now.toLocaleDateString('en-GB', {month: 'long'}) + ' so far';
+  if (!S.usage.DAILY) { $('monthCost').textContent = '–'; $('monthKwh').textContent = ''; return; }
+  const days = S.usage.DAILY.filter(n => n.from.getFullYear() === now.getFullYear() && n.from.getMonth() === now.getMonth() && n.kwh != null);
+  let mk = days.reduce((a, n) => a + n.kwh, 0), mc = days.reduce((a, n) => a + (n.cost || 0), 0);
+  if (today && !days.some(n => sameDay(n.from, now))) { mk += today.kwh; mc += today.cost || 0; }
+  if (!days.length && !today) { $('monthCost').textContent = '–'; $('monthKwh').textContent = 'No data yet this month'; return; }
+  $('monthCost').textContent = kr(mc);
+  $('monthKwh').textContent = kwh(mk);
+}
+function renderLiveTile() {
+  const dot = $('liveDot');
+  if (!hasLive()) {
+    dot.classList.remove('on');
+    $('liveW').textContent = '–';
+    $('liveSub').textContent = 'Needs a Tibber Pulse on the meter';
+    $('livePanel').classList.add('hidden');
+    document.querySelector('.grid2').style.gridTemplateColumns = '1fr';
+    return;
+  }
+  $('livePanel').classList.remove('hidden');
+  document.querySelector('.grid2').style.gridTemplateColumns = '';
+  if (!S.live) { dot.classList.remove('on'); $('liveW').textContent = '–'; $('liveSub').textContent = 'Connecting to your meter…'; return; }
+  dot.classList.add('on');
+  const w = S.live.power;
+  $('liveW').innerHTML = (w >= 10000 ? nf(w / 1000, 1) + '<small>kW</small>' : nf(w, 0) + '<small>W</small>');
+  const pi = home().currentSubscription && home().currentSubscription.priceInfo;
+  const p = pi && pi.current ? pi.current.total : null;
+  $('liveSub').textContent = p != null ? `≈ ${nf(w / 1000 * p, 2)} kr per hour at this rate` : '';
+}
+
+/* ---------- live (Tibber Pulse) ---------- */
+function startLive() {
+  if (!hasLive()) return;
+  if (DEMO) { demoLive(); return; }
+  if (!S.wsUrl) return;
+  const homeId = S.homeId;
+  let ws;
+  try { ws = new WebSocket(S.wsUrl, 'graphql-transport-ws'); } catch (e) { scheduleLive(); return; }
+  S.ws = ws;
+  ws.onopen = () => ws.send(JSON.stringify({type: 'connection_init', payload: {token: S.token}}));
+  ws.onmessage = ev => {
+    let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (m.type === 'connection_ack') {
+      S.wsRetry = 0;
+      ws.send(JSON.stringify({id: '1', type: 'subscribe', payload: {query:
+        `subscription { liveMeasurement(homeId: "${homeId}") { timestamp power accumulatedConsumption accumulatedCost minPower maxPower averagePower } }`}}));
+    } else if (m.type === 'ping') ws.send(JSON.stringify({type: 'pong'}));
+    else if (m.type === 'next' && m.payload && m.payload.data && m.payload.data.liveMeasurement) onLive(m.payload.data.liveMeasurement);
+    else if (m.type === 'error' || m.type === 'complete') ws.close();
+  };
+  ws.onclose = () => { if (S.ws === ws) { S.ws = null; S.live = null; renderLiveTile(); scheduleLive(); } };
+  ws.onerror = () => {};
+}
+function scheduleLive() {
+  clearTimeout(S.wsTimer);
+  const wait = Math.min(300, 5 * Math.pow(2, S.wsRetry++)) * 1000 + Math.random() * 5000;
+  S.wsTimer = setTimeout(startLive, wait);
+}
+function stopLive() {
+  clearTimeout(S.wsTimer); clearInterval(S.demoTimer);
+  const ws = S.ws; S.ws = null;
+  if (ws) { try { ws.close(); } catch (e) {} }
+}
+function onLive(m) {
+  S.live = m;
+  const t = new Date(m.timestamp).getTime() || Date.now();
+  S.livePoints.push({t, w: m.power});
+  const cut = t - 15 * 60 * 1000;
+  while (S.livePoints.length && S.livePoints[0].t < cut) S.livePoints.shift();
+  renderLiveTile(); renderTotals(); renderLiveChart();
+}
+
+/* ---------- charts ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+function niceMax(v) {
+  if (!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v))), f = v / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+}
+function axisFmt(v, max) { return max >= 20 ? nf(v, 0) : max >= 2 ? nf(v, 1) : nf(v, 2); }
+function tipShow(ev, html) {
+  const t = $('tip'); t.innerHTML = html; t.classList.remove('hidden');
+  const r = t.getBoundingClientRect();
+  let x = ev.clientX + 14, y = ev.clientY - r.height - 10;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+  if (y < 8) y = ev.clientY + 16;
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+function tipHide() { $('tip').classList.add('hidden'); }
+
+/* items: [{label, value, tip, dim, mark}]  — one series, so no legend; the panel title names it */
+function barChart(el, items, opts = {}) {
+  const W = el.clientWidth || 800, H = opts.height || 280;
+  const m = {l: 46, r: 8, t: 14, b: 28};
+  const vals = items.map(i => i.value).filter(v => v != null);
+  if (!vals.length) { el.innerHTML = `<div class="empty">${esc(opts.empty || 'No data yet')}</div>`; return; }
+  const max = niceMax(Math.max(...vals) * 1.02), pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const step = pw / items.length, bw = Math.max(2, Math.min(36, step - 2));
+  const y = v => m.t + ph - (v / max) * ph;
+  let s = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  for (let i = 0; i <= 4; i++) {
+    const v = max * i / 4, yy = y(v);
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="${i ? '#2a2a28' : '#45453f'}" stroke-width="1"/>`;
+    s += `<text x="${m.l - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="#8b8a82">${axisFmt(v, max)}</text>`;
+  }
+  const every = Math.max(1, Math.ceil(items.length / Math.max(2, Math.floor(pw / 62))));
+  items.forEach((it, i) => {
+    const cx = m.l + step * i + step / 2;
+    if (it.value != null) {
+      const h = Math.max(1, m.t + ph - y(it.value)), r = Math.min(4, bw / 2, h);
+      const x0 = cx - bw / 2, y0 = m.t + ph - h;
+      s += `<path d="M${x0} ${y0 + h}V${y0 + r}q0-${r} ${r}-${r}h${bw - 2 * r}q${r} 0 ${r} ${r}V${y0 + h}z" fill="${it.dim ? '#27528a' : '#3987e5'}" data-i="${i}" class="bar"/>`;
+      if (it.mark) s += `<circle cx="${cx}" cy="${y0 - 7}" r="3" fill="#f0efec"/>`;
     }
-    return { bytes: bytes, skipped: skipped };
-  }
-  function isReadable(s) {
-    return /[^\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/.test(s);
-  }
-
-  /* Encode view */
-  var CARRIERS = ["🤫", "😀", "😎", "🦊", "🐙", "🐸", "🍕", "🌵", "🚀", "🪐", "🎁", "💌", "👀", "🧠", "🔒", "🥚"];
-  var state = { method: "hide", chip: CARRIERS[0], carrier: CARRIERS[0], output: "" };
-  var msg = $("#msg"), big = $("#big"), barcode = $("#barcode"), meta = $("#enc-meta"),
-      spelled = $("#spelled"), copyEnc = $("#copy-enc"), toDec = $("#to-decoder"),
-      carriersEl = $("#carriers"), custom = $("#custom"), carrierField = $("#carrier-field"),
-      hideView = $("#hide-view"), spellView = $("#spell-view"), hideNote = $("#hide-note");
-
-  function cleanCarrier(s) {
-    return Array.from(s).filter(function (ch) {
-      var cp = ch.codePointAt(0);
-      return !((cp >= 0xFE00 && cp <= 0xFE0E) || (cp >= 0xE0100 && cp <= 0xE01EF));
-    }).join("").trim();
-  }
-
-  var chips = CARRIERS.map(function (e) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "carrier";
-    b.textContent = e;
-    b.setAttribute("aria-label", "Carrier " + e);
-    b.addEventListener("click", function () {
-      state.chip = e;
-      custom.value = "";
-      setCarrier(e, true);
+    if (i % every === 0 || it.forceLabel) s += `<text x="${cx}" y="${H - 9}" text-anchor="middle" font-size="11" fill="#8b8a82">${esc(it.label)}</text>`;
+    s += `<rect x="${m.l + step * i}" y="${m.t}" width="${step}" height="${ph}" fill="transparent" data-i="${i}" class="hit"/>`;
+  });
+  s += '</svg>';
+  el.innerHTML = s;
+  const bars = el.querySelectorAll('.bar');
+  el.querySelectorAll('.hit').forEach(h => {
+    const i = +h.dataset.i;
+    h.addEventListener('pointermove', ev => {
+      bars.forEach(b => b.setAttribute('opacity', +b.dataset.i === i ? 1 : .55));
+      tipShow(ev, items[i].tip);
     });
-    carriersEl.insertBefore(b, custom);
-    return b;
+    h.addEventListener('pointerleave', ev => { if (ev.pointerType === 'touch') return; bars.forEach(b => b.removeAttribute('opacity')); tipHide(); });
   });
+}
 
-  function syncChips() {
-    var usingCustom = cleanCarrier(custom.value) !== "";
-    chips.forEach(function (b) {
-      b.setAttribute("aria-pressed", String(!usingCustom && b.textContent === state.chip));
-    });
-  }
-
-  function setCarrier(c, pop) {
-    state.carrier = c;
-    syncChips();
-    renderEncode();
-    if (pop) {
-      big.classList.remove("pop");
-      void big.offsetWidth;
-      big.classList.add("pop");
-    }
-  }
-
-  custom.addEventListener("input", function () {
-    setCarrier(cleanCarrier(custom.value) || state.chip, false);
+function renderUsage() {
+  const el = $('usageChart'), nodes = S.usage[S.res];
+  const titles = {HOURLY: 'Power usage · last 48 hours', DAILY: 'Power usage · last 31 days', MONTHLY: 'Power usage · last 12 months'};
+  $('usageTitle').textContent = titles[S.res];
+  if (!nodes) { el.innerHTML = '<div class="empty">Loading…</div>'; $('usageTotal').textContent = ''; return; }
+  const cost = S.unit === 'cost';
+  const items = nodes.map(n => {
+    const v = cost ? n.cost : n.kwh;
+    let label, when;
+    if (S.res === 'HOURLY') { label = fmtTime(n.from); when = fmtWeekday(n.from) + ', ' + fmtTime(n.from) + '–' + fmtTime(n.to); }
+    else if (S.res === 'DAILY') { label = fmtDay(n.from); when = fmtWeekday(n.from); }
+    else { label = fmtMonth(n.from); when = n.from.toLocaleDateString('en-GB', {month: 'long', year: 'numeric'}); }
+    const tip = `<span>${esc(when)}</span><b>${n.kwh == null ? 'No data' : kwh2(n.kwh)}</b><b>${n.cost == null ? '' : kr(n.cost)}</b>` +
+      (n.price != null && S.res === 'HOURLY' ? `<span>${nf(n.price, 2)} kr/kWh</span>` : '');
+    return {label, value: v == null ? null : Math.max(0, v), tip};
   });
+  const tk = nodes.reduce((a, n) => a + (n.kwh || 0), 0), tc = nodes.reduce((a, n) => a + (n.cost || 0), 0);
+  $('usageTotal').textContent = nodes.some(n => n.kwh != null) ? `Total ${kwh(tk)} · ${kr(tc)}` : '';
+  barChart(el, items, {empty: 'Tibber has no usage data for this period yet'});
+}
+const kwh2 = n => nf(n, n >= 100 ? 0 : 2) + ' kWh';
 
-  var MAX_BARS = 240;
-  function drawBarcode(bytes) {
-    var frag = document.createDocumentFragment();
-    var shown = Math.min(bytes.length, MAX_BARS);
-    for (var i = 0; i < shown; i++) {
-      var b = bytes[i];
-      var s = document.createElement("span");
-      s.className = b >= 0x80 ? "bar multi" : "bar";
-      s.style.height = (5 + Math.round((b / 255) * 27)) + "px";
-      frag.appendChild(s);
-    }
-    if (bytes.length > MAX_BARS) {
-      var m = document.createElement("span");
-      m.className = "more";
-      m.textContent = "+" + (bytes.length - MAX_BARS);
-      frag.appendChild(m);
-    }
-    barcode.replaceChildren(frag);
-  }
-
-  function renderEncode() {
-    var bytes = te.encode(msg.value);
-    var n = bytes.length;
-    var hide = state.method === "hide";
-    hideView.hidden = !hide;
-    spellView.hidden = hide;
-    carrierField.hidden = !hide;
-    hideNote.hidden = !hide;
-
-    if (hide) {
-      var out = state.carrier;
-      for (var i = 0; i < n; i++) out += byteToVS(bytes[i]);
-      big.textContent = out;
-      state.output = n ? out : "";
-      drawBarcode(bytes);
-      meta.textContent = n
-        ? n + " hidden " + plural(n, "byte", "bytes") + ", stored as invisible characters after " + state.carrier + "."
-        : "Type a message to hide it in this emoji.";
-    } else {
-      var spelledOut = Array.from(bytes, function (b) { return ALPHA[b]; }).join("");
-      spelled.textContent = spelledOut;
-      state.output = spelledOut;
-      meta.textContent = n
-        ? n + " emoji, one for each byte of your message."
-        : "";
-    }
-    copyEnc.disabled = !state.output;
-    toDec.disabled = !state.output;
-  }
-
-  document.querySelectorAll(".method").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      state.method = btn.dataset.method;
-      document.querySelectorAll(".method").forEach(function (b) {
-        b.setAttribute("aria-pressed", String(b === btn));
-      });
-      renderEncode();
-    });
+function renderPriceChart(prices) {
+  const el = $('priceChart'), now = Date.now();
+  if (!prices.length) { el.innerHTML = '<div class="empty">No price info</div>'; $('priceRange').textContent = ''; return; }
+  const hasTomorrow = prices.length > 24;
+  $('priceRange').textContent = hasTomorrow ? 'Today and tomorrow' : 'Today';
+  const items = prices.map((p, i) => {
+    const d = new Date(p.startsAt), next = prices[i + 1] ? new Date(prices[i + 1].startsAt).getTime() : d.getTime() + 3600e3;
+    const isNow = d.getTime() <= now && now < next;
+    return {label: fmtTime(d), value: Math.max(0, p.total), dim: !isNow, mark: isNow,
+      tip: `<span>${esc(fmtWeekday(d))}, ${fmtTime(d)}${isNow ? ' · now' : ''}</span><b>${nf(p.total, 2)} kr/kWh</b>`};
   });
-  msg.addEventListener("input", renderEncode);
+  barChart(el, items, {height: 220});
+}
 
-  /* Copy */
-  async function copyText(text, btn) {
-    var ok = false;
-    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
-    if (!ok) {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.top = "0";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-      ta.remove();
-    }
-    btn.textContent = ok ? "Copied" : "Couldn’t copy";
-    clearTimeout(btn._t);
-    btn._t = setTimeout(function () { btn.textContent = btn.dataset.label; }, ok ? 1500 : 2500);
+function renderLiveChart() {
+  const el = $('liveChart'), pts = S.livePoints;
+  if (!hasLive()) return;
+  if (pts.length < 2) { el.innerHTML = '<div class="empty">Waiting for live readings…</div>'; $('liveRange').textContent = ''; return; }
+  const W = el.clientWidth || 500, H = 220, m = {l: 46, r: 12, t: 14, b: 28};
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const t1 = pts[pts.length - 1].t, t0 = Math.min(pts[0].t, t1 - 60e3);
+  const max = niceMax(Math.max(...pts.map(p => p.w)) * 1.05);
+  const x = t => m.l + (t - t0) / (t1 - t0) * pw, y = v => m.t + ph - (Math.max(0, v) / max) * ph;
+  $('liveRange').textContent = `Last ${Math.max(1, Math.round((t1 - pts[0].t) / 60e3))} min`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  for (let i = 0; i <= 4; i++) {
+    const v = max * i / 4, yy = y(v);
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="${i ? '#2a2a28' : '#45453f'}"/>`;
+    s += `<text x="${m.l - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="#8b8a82">${nf(v, 0)}</text>`;
   }
-  copyEnc.addEventListener("click", function () { copyText(state.output, copyEnc); });
-
-  /* Decode view */
-  var decIn = $("#dec-in"), decOut = $("#dec-out"), decStatus = $("#dec-status"),
-      copyDec = $("#copy-dec"), clearDec = $("#clear-dec");
-  var decoded = "";
-
-  function renderDecode() {
-    var text = decIn.value;
-    var msgs = [];
-    var status;
-    if (!text) {
-      status = "Paste an encoded emoji or a string of emoji above. The method is detected automatically.";
-    } else {
-      msgs = findHidden(text).filter(isReadable);
-      if (msgs.length) {
-        status = msgs.length === 1
-          ? "Found a message hidden in invisible characters."
-          : "Found " + msgs.length + " hidden messages.";
-      } else {
-        var r = readSpelled(text);
-        var s = r.bytes.length ? td.decode(new Uint8Array(r.bytes)) : "";
-        if (s && isReadable(s)) {
-          msgs = [s];
-          status = "Read as emoji spelling." + (r.skipped
-            ? " Skipped " + r.skipped + " " + plural(r.skipped, "character", "characters") + " outside the emoji alphabet."
-            : "");
-        } else {
-          status = "No message found. If you pasted a single emoji, the app you copied it from may have stripped the invisible characters.";
-        }
-      }
-    }
-    decStatus.textContent = status;
-    decOut.replaceChildren();
-    msgs.forEach(function (m) {
-      var p = document.createElement("p");
-      p.textContent = m;
-      decOut.appendChild(p);
-    });
-    decOut.hidden = !msgs.length;
-    decoded = msgs.join("\n\n");
-    copyDec.disabled = !decoded;
-    clearDec.disabled = !text;
-  }
-  decIn.addEventListener("input", renderDecode);
-  clearDec.addEventListener("click", function () { decIn.value = ""; renderDecode(); decIn.focus(); });
-  copyDec.addEventListener("click", function () { copyText(decoded, copyDec); });
-  toDec.addEventListener("click", function () {
-    decIn.value = state.output;
-    go("decode");
-    renderDecode();
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(p.w).toFixed(1)).join('');
+  s += `<path d="${d}L${x(t1)} ${m.t + ph}L${x(pts[0].t)} ${m.t + ph}z" fill="#3987e5" opacity=".12"/>`;
+  s += `<path d="${d}" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const last = pts[pts.length - 1];
+  s += `<circle cx="${x(last.t)}" cy="${y(last.w)}" r="4" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>`;
+  s += `<text x="${m.l}" y="${H - 9}" font-size="11" fill="#8b8a82">${fmtTime(new Date(t0))}</text>`;
+  s += `<text x="${W - m.r}" y="${H - 9}" text-anchor="end" font-size="11" fill="#8b8a82">now</text>`;
+  s += `<line id="lx" y1="${m.t}" y2="${m.t + ph}" stroke="#8b8a82" stroke-width="1" visibility="hidden"/>`;
+  s += `<rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent" id="lhit"/></svg>`;
+  el.innerHTML = s;
+  const hit = el.querySelector('#lhit'), lx = el.querySelector('#lx');
+  hit.addEventListener('pointermove', ev => {
+    const r = hit.getBoundingClientRect(), t = t0 + (ev.clientX - r.left) / r.width * (t1 - t0);
+    let best = pts[0]; for (const p of pts) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    lx.setAttribute('x1', x(best.t)); lx.setAttribute('x2', x(best.t)); lx.setAttribute('visibility', 'visible');
+    tipShow(ev, `<span>${new Date(best.t).toLocaleTimeString('en-GB')}</span><b>${nf(best.w, 0)} W</b>`);
   });
+  hit.addEventListener('pointerleave', ev => { if (ev.pointerType === 'touch') return; lx.setAttribute('visibility', 'hidden'); tipHide(); });
+}
 
-  /* Tabs and #encode / #decode links */
-  var tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-  function show(view) {
-    tabs.forEach(function (t) {
-      var on = t.dataset.view === view;
-      t.setAttribute("aria-selected", String(on));
-      t.tabIndex = on ? 0 : -1;
-      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
-    });
+/* touch: a tap on a bar shows its value; a tap anywhere else clears it */
+document.addEventListener('pointerdown', ev => {
+  if (ev.target.closest && ev.target.closest('.hit, #lhit')) return;
+  tipHide(); document.querySelectorAll('.bar').forEach(b => b.removeAttribute('opacity'));
+  const lx = document.getElementById('lx'); if (lx) lx.setAttribute('visibility', 'hidden');
+}, true);
+addEventListener('orientationchange', () => setTimeout(() => { renderUsage(); renderPrice(); renderLiveChart(); }, 300));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token && !$('app').classList.contains('hidden')) { refreshAll(); if (!S.ws && !DEMO) { S.wsRetry = 0; clearTimeout(S.wsTimer); startLive(); } } });
+
+/* ---------- controls ---------- */
+function seg(id, key, after) {
+  $(id).addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    $(id).querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+    S[key] = b.dataset.v; after();
+  });
+}
+seg('resSeg', 'res', renderUsage);
+seg('unitSeg', 'unit', renderUsage);
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { renderUsage(); renderPrice(); renderLiveChart(); }, 120); });
+
+/* ---------- demo data (open index.html?demo to preview without an account) ---------- */
+function demoApi(q) {
+  const now = new Date(), H = 3600e3;
+  const price = d => 0.9 + 0.5 * Math.sin((d.getHours() - 3) / 24 * 2 * Math.PI) + (d.getHours() > 16 && d.getHours() < 20 ? 0.4 : 0);
+  if (q.includes('websocketSubscriptionUrl')) {
+    const day = off => Array.from({length: 24}, (_, h) => { const d = new Date(now); d.setDate(d.getDate() + off); d.setHours(h, 0, 0, 0);
+      return {total: +price(d).toFixed(4), startsAt: d.toISOString(), level: 'NORMAL'}; });
+    const today = day(0);
+    return Promise.resolve({viewer: {name: 'Demo', websocketSubscriptionUrl: 'demo', homes: [{id: 'demo', appNickname: 'Demo home', address: {address1: 'Demoveien 1'},
+      features: {realTimeConsumptionEnabled: true}, currentSubscription: {priceInfo: {current: today[now.getHours()], today, tomorrow: day(1)}}}]}});
   }
-  function go(view) {
-    show(view);
-    if (location.hash !== "#" + view) {
-      try { location.hash = view; } catch (e) { /* ignore */ }
+  const res = /resolution: (\w+)/.exec(q)[1], n = +/last: (\d+)/.exec(q)[1], nodes = [];
+  for (let i = n; i >= 1; i--) {
+    let from, to, k;
+    if (res === 'HOURLY') { from = new Date(Math.floor(now / H) * H - i * H); to = new Date(+from + H); k = 1.2 + Math.abs(Math.sin(from.getHours() / 24 * Math.PI * 2)) * 2.2 + (i * 7 % 5) / 5; }
+    else if (res === 'DAILY') { from = new Date(now); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - i); to = new Date(from); to.setDate(to.getDate() + 1); k = 45 + (i * 13 % 30); }
+    else { from = new Date(now.getFullYear(), now.getMonth() - i, 1); to = new Date(now.getFullYear(), now.getMonth() - i + 1, 1); k = 900 + 800 * Math.abs(Math.cos(from.getMonth() / 12 * Math.PI)); }
+    const p = res === 'HOURLY' ? price(from) : 1.05;
+    nodes.push({from: from.toISOString(), to: to.toISOString(), consumption: +k.toFixed(3), cost: +(k * p).toFixed(3), unitPrice: p, currency: 'NOK'});
+  }
+  return Promise.resolve({viewer: {home: {consumption: {nodes}}}});
+}
+function demoLive() {
+  let w = 2400, acc = 31.4, cost = 33.8, t = Date.now() - 120 * 2000;
+  const tick = ts => { w = Math.max(300, w + (Math.random() - .5) * 500); acc += w / 1000 / 1800; cost += w / 1000 / 1800 * 1.1;
+    onLive({timestamp: new Date(ts).toISOString(), power: Math.round(w), accumulatedConsumption: acc, accumulatedCost: cost}); };
+  for (let i = 0; i < 120; i++) tick(t += 2000);
+  clearInterval(S.demoTimer); S.demoTimer = setInterval(() => tick(Date.now()), 2000);
+}
+
+/* ---------- boot ---------- */
+(async function boot() {
+  if (DEMO) S.token = 'demo';
+  if (!S.token) { showLogin(''); return; }
+  try { startApp(await gql(Q_VIEWER)); }
+  catch (e) {
+    if (e instanceof AuthError) { store.del('tibberToken'); S.token = null; showLogin('Your Tibber login has expired. Please log in again.'); }
+    else { // offline at startup: show the app shell and keep retrying
+      $('app').classList.remove('hidden'); handleErr(e);
+      setTimeout(boot, 30000);
     }
   }
-  tabs.forEach(function (t) { t.addEventListener("click", function () { go(t.dataset.view); }); });
-  $(".tabs").addEventListener("keydown", function (e) {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    var i = tabs.findIndex(function (t) { return t.getAttribute("aria-selected") === "true"; });
-    var next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
-    go(next.dataset.view);
-    next.focus();
-    e.preventDefault();
-  });
-  function fromHash() { return location.hash === "#decode" ? "decode" : "encode"; }
-  window.addEventListener("hashchange", function () { show(fromHash()); });
-
-  show(fromHash());
-  syncChips();
-  renderEncode();
-  renderDecode();
 })();
 </script>
 </body>
